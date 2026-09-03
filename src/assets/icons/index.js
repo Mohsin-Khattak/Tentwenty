@@ -1,0 +1,5 @@
+export { default as DashboardIcon } from './dashboard.svg';
+export { default as MediaIcon } from './media.svg';
+export { default as WatchIcon } from './watch.svg';
+export { default as MoreIcon } from './more.svg';
+export { default as SearchIcon } from './search.svg';

@@ -1,55 +1,10 @@
 import axios from 'axios';
-import { UTILS } from '../utils';
-import { URLS } from '../services/api/api-urls';
-import { STORAGEKEYS } from './constant';
-import { navigate } from '../navigation/navigation-ref';
-const CancelToken = axios.CancelToken;
-source = CancelToken.source();
-client = axios.create({
-  baseURL: URLS.base_url,
-});
-function newAbortSignal(timeoutMs) {
-  const abortController = new AbortController();
-  setTimeout(() => abortController.abort(), timeoutMs || 0);
-  return abortController.signal;
-}
-//Axios Interceptors
-client.interceptors.request.use(
-  async config => {
-    let token = await UTILS.getItem(STORAGEKEYS.token);
-    console.log('token->>>', token);
-    config.headers = {
-      'Cache-Control': 'no-cache',
-      Accept: 'application/json',
-    };
-    // config.signal = newAbortSignal(15000),
-    config.params = config.params || {};
-    config.cancelToken = source.token || {};
-    config.headers['Authorization'] = `Bearer ${token}`;
-    return config;
-  },
-  error => {
-    console.log('I am here');
-    Promise.reject(error);
-  },
-);
+import Config from 'react-native-config';
 
-client.interceptors.response.use(
-  response => {
-    console.log('RESPONSE INTERCPTOR : ', response?.status);
-    return response;
+export const tmdbClient = axios.create({
+  baseURL: 'https://api.themoviedb.org/3',
+  params: {
+    api_key: '254664df1b6a898c8321c2bef99c85bd',
+    language: 'en-US',
   },
-  async function (error) {
-    console.log('INTERCEPTOR ERROR RESPONSE : ', error);
-    console.log('INTERCEPTOR ERROR RESPONSE CONFIG: ', error?.config);
-    const originalRequest = error.config;
-    if (error?.response?.status === undefined && error?.config === undefined) {
-      return Promise.reject('Hi Dude');
-    } else if (error?.response?.status === 401) {
-      originalRequest._retry = true;
-      navigate('Login');
-      //await DIVIY_API.refreshToken(JSON.parse(token)?.refresh_token);
-    }
-    return Promise.reject(error);
-  },
-);
+});

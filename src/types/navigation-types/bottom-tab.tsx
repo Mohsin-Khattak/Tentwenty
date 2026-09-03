@@ -1,7 +1,7 @@
 type TabParamList = {
   DashboardTab: undefined;
   WatchTab: undefined;
-  MedialibraryTab: undefined;
+  MediaTab: undefined;
   MoreTab: undefined;
 };
 export default TabParamList;
