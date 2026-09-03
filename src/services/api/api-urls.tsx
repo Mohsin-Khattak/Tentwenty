@@ -4,4 +4,6 @@ export const TMDB_URLS = {
   movieImages: '/movie',
   movieVideos: '/movie',
   search: '/search/movie',
+  genres: '/genre/movie/list',
+  discover: '/discover/movie',
 };

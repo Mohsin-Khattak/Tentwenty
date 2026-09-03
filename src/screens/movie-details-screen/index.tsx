@@ -9,12 +9,17 @@ import FastImage from 'react-native-fast-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackIcon, PlayIcon } from '../../assets/icons';
 import { PrimaryButton } from '../../components/atoms/button/primary-button';
-import { getMovieDetails } from '../../services/api/watch-api-action';
+
+import {
+  getMovieDetails,
+  getMovieVideos,
+} from '../../services/api/watch-api-action';
 import { MovieDetails } from '../../types/entities-types';
 import Bold from '../../typography/bold-text';
 import Medium from '../../typography/medium-text';
 import Regular from '../../typography/regular-text';
 import styles from './styles';
+import { TrailerModal } from '../../components/atoms/modal/trailermodal';
 
 const GENRE_COLORS = ['#15D2BC', '#E26CA5', '#564CA3', '#CD9D0F', '#60C3D8'];
 
@@ -22,6 +27,13 @@ const MoviesDetailsScreen = (props: any) => {
   const movieId = props.route?.params?.movieId;
   const [data, setData] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Player States
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [trailerLoading, setTrailerLoading] = useState(false);
+
   const insets = useSafeAreaInsets();
 
   const getDetails = async () => {
@@ -33,6 +45,37 @@ const MoviesDetailsScreen = (props: any) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getVideoTrailer = async () => {
+    try {
+      setTrailerLoading(true);
+      const response = await getMovieVideos(movieId);
+      const results = response?.results || [];
+
+      const officialTrailer = results.find(
+        (item: any) => item.site === 'YouTube' && item.type === 'Trailer',
+      );
+      const selectedVideo =
+        officialTrailer || results.find((item: any) => item.site === 'YouTube');
+
+      if (selectedVideo?.key) {
+        setTrailerKey(selectedVideo.key);
+        setIsVideoVisible(true);
+        setPlaying(true);
+      } else {
+        console.log('No video trailer key found');
+      }
+    } catch (error) {
+      console.log('TMDB TRAILER ERROR:', error);
+    } finally {
+      setTrailerLoading(false);
+    }
+  };
+
+  const closePlayer = () => {
+    setPlaying(false);
+    setIsVideoVisible(false);
   };
 
   useEffect(() => {
@@ -83,7 +126,6 @@ const MoviesDetailsScreen = (props: any) => {
               { paddingTop: insets.top > 0 ? insets.top + 10 : 20 },
             ]}
           >
-            {/* Top Bar Navigation */}
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => props.navigation?.goBack()}
@@ -92,7 +134,6 @@ const MoviesDetailsScreen = (props: any) => {
               <Regular style={styles.backText} label={'Watch'} />
             </TouchableOpacity>
 
-            {/* Title & Buttons */}
             <View style={styles.headerContent}>
               <Medium style={styles.title} fontSize={16} label={data?.title} />
               {formattedDate ? (
@@ -101,22 +142,20 @@ const MoviesDetailsScreen = (props: any) => {
                 </Medium>
               ) : null}
 
-              {/* Action Buttons */}
               <PrimaryButton
                 title="Get Tickets"
                 onPress={() => console.log('GET TICKETS')}
               />
               <PrimaryButton
-                title="Watch Trailer"
+                title={trailerLoading ? 'Loading...' : 'Watch Trailer'}
                 variant="outlined"
-                icon={<PlayIcon />}
-                onPress={() => console.log('WATCH TRAILER')}
+                icon={!trailerLoading ? <PlayIcon /> : null}
+                onPress={getVideoTrailer}
               />
             </View>
           </View>
         </View>
 
-        {/* Details Section */}
         <View style={styles.detailsContainer}>
           <Medium style={styles.sectionTitle} label={'Genres'} />
 
@@ -150,6 +189,15 @@ const MoviesDetailsScreen = (props: any) => {
           />
         </View>
       </ScrollView>
+
+      {/* Reusable Trailer Modal Component */}
+      <TrailerModal
+        visible={isVideoVisible}
+        trailerKey={trailerKey}
+        playing={playing}
+        onClose={closePlayer}
+        setPlaying={setPlaying}
+      />
     </View>
   );
 };

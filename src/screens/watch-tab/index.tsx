@@ -127,14 +127,14 @@ const WatchTab: React.FC = () => {
     <View style={styles.container}>
       <View
         style={{
-          paddingTop: Platform.OS === 'ios' ? insets?.top : 0,
-          backgroundColor: Platform.OS === 'ios' ? colors.statsbar : null,
+          paddingTop: Platform.OS === 'ios' ? insets?.top : 20,
+          backgroundColor: colors.white,
         }}
       />
       <AppHeader
         title="Watch"
         onSearchPress={() => {
-          console.log('SEARCH');
+          navigate('SearchScreen');
         }}
       />
 

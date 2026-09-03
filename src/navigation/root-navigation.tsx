@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import RootStackParamList from '../types/navigation-types/root-stack';
 import TabNavigator from './tab-navigation';
 import MoviesDetailsScreen from '../screens/movie-details-screen';
+import SearchScreen from '../screens/search-screen';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {

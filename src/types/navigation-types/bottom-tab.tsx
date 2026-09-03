@@ -3,5 +3,6 @@ type TabParamList = {
   WatchTab: undefined;
   MediaTab: undefined;
   MoreTab: undefined;
+  SearchScreen: undefined;
 };
 export default TabParamList;

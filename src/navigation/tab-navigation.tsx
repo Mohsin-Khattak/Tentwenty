@@ -9,6 +9,7 @@ import MoreTab from '../screens/more-tab';
 
 import { DashboardIcon, WatchIcon, MediaIcon, MoreIcon } from '../assets/icons';
 import { colors } from '../config/colors';
+import { WatchStackNavigator } from './watch-navigation';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -60,7 +61,7 @@ const TabNavigator = () => {
 
         <Tab.Screen
           name="WatchTab"
-          component={WatchTab}
+          component={WatchStackNavigator}
           options={{
             tabBarLabel: 'Watch',
           }}

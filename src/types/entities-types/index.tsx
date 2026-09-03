@@ -70,3 +70,8 @@ export type MovieDetails = {
   vote_average: number;
   vote_count: number;
 };
+export type Genre = {
+  id: number;
+  name: string;
+  image: string;
+};
