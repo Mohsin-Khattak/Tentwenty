@@ -1,11 +1,17 @@
 import React from 'react';
-import {ColorValue, StyleProp, StyleSheet, Text, TextStyle} from 'react-native';
+import {
+  ColorValue,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+} from 'react-native';
 import fonts from '../assets/fonts';
-import {mvs} from '../config/metrices';
-import {colors} from '../config/colors';
+import { mvs } from '../config/metrices';
+import { colors } from '../config/colors';
 
 type FcProps = {
-  label: string | number;
+  label?: string | number;
   numberOfLines?: number;
   fontSize?: number;
   color?: ColorValue | undefined;
@@ -27,7 +33,8 @@ const Medium: React.FC<FcProps> = ({
   return chatScreen ? (
     <Text
       {...props}
-      style={[{...styles.label, color: color, fontSize: fontSize}, style]}>
+      style={[{ ...styles.label, color: color, fontSize: fontSize }, style]}
+    >
       {label}
       {children}
     </Text>
@@ -35,7 +42,8 @@ const Medium: React.FC<FcProps> = ({
     <Text
       numberOfLines={numberOfLines}
       {...props}
-      style={[{...styles.label, color: color, fontSize: fontSize}, style]}>
+      style={[{ ...styles.label, color: color, fontSize: fontSize }, style]}
+    >
       {label}
       {children}
     </Text>

@@ -3,11 +3,12 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
 import styles from './styles';
+import Medium from '../../../typography/medium-text';
 
 interface Movie {
   id: number;
   title: string;
-  poster_path: string | null;
+  backdrop_path: string | null;
 }
 
 interface MoviesCardProps {
@@ -16,8 +17,8 @@ interface MoviesCardProps {
 }
 
 const MoviesCard: React.FC<MoviesCardProps> = ({ item, onPress }) => {
-  const imageUrl = item?.poster_path
-    ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+  const imageUrl = item?.backdrop_path
+    ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
     : '';
 
   return (
@@ -38,9 +39,7 @@ const MoviesCard: React.FC<MoviesCardProps> = ({ item, onPress }) => {
         />
 
         <View style={styles.titleContainer}>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.title}
-          </Text>
+          <Medium label={item?.title} style={styles.title} />
         </View>
       </View>
     </TouchableOpacity>

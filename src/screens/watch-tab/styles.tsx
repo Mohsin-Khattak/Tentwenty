@@ -9,5 +9,10 @@ const styles = StyleSheet.create({
     paddingTop: mvs(20),
   },
   footerLoader: { paddingVertical: mvs(15) },
+  skeletonContainer: {
+    flex: 1,
+    paddingTop: mvs(20),
+    paddingHorizontal: mvs(20),
+  },
 });
 export default styles;

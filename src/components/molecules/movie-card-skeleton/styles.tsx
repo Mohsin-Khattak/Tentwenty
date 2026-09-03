@@ -1,12 +1,11 @@
 import { StyleSheet } from 'react-native';
 
 import { mvs } from '../../../config/metrices';
-import { colors } from '../../../config/colors';
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    marginBottom: mvs(20),
+    marginBottom: mvs(16),
   },
 
   imageContainer: {
@@ -14,24 +13,14 @@ const styles = StyleSheet.create({
     height: mvs(180),
     borderRadius: mvs(10),
     overflow: 'hidden',
-    position: 'relative',
+    backgroundColor: '#E5E5E5',
   },
 
-  image: {
-    width: '100%',
+  shimmer: {
+    width: mvs(120),
     height: '100%',
-  },
-
-  titleContainer: {
-    position: 'absolute',
-    left: mvs(14),
-    right: mvs(14),
-    bottom: mvs(14),
-  },
-
-  title: {
-    color: colors.white,
-    fontSize: mvs(18),
+    backgroundColor: '#F5F5F5',
+    opacity: 0.8,
   },
 });
 

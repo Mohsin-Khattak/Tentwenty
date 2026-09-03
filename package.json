@@ -39,6 +39,7 @@
     "react-native-fast-image": "^8.6.3",
     "react-native-safe-area-context": "^5.9.1",
     "react-native-screens": "^4.27.0",
+    "react-native-shimmer-placeholder": "^2.0.9",
     "react-native-svg": "^15.15.5"
   },
   "devDependencies": {

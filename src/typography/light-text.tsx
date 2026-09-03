@@ -1,9 +1,15 @@
 import React from 'react';
-import {ColorValue, StyleProp, StyleSheet, Text, TextStyle} from 'react-native';
+import {
+  ColorValue,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+} from 'react-native';
 import fonts from '../assets/fonts';
 
-import {mvs} from '../config/metrices';
-import {colors} from '../config/colors';
+import { mvs } from '../config/metrices';
+import { colors } from '../config/colors';
 
 type FcProps = {
   label?: string | number;
@@ -12,7 +18,7 @@ type FcProps = {
   color?: ColorValue | undefined;
   onPress?: (() => void) | undefined;
   style?: StyleProp<TextStyle>;
-  children?: JSX.Element | JSX.Element[] | null;
+  children?: any;
 };
 const Light: React.FC<FcProps> = ({
   label,
@@ -27,7 +33,8 @@ const Light: React.FC<FcProps> = ({
     <Text
       numberOfLines={numberOfLines}
       {...props}
-      style={[{...styles.label, color: color, fontSize: fontSize}, style]}>
+      style={[{ ...styles.label, color: color, fontSize: fontSize }, style]}
+    >
       {label}
       {children}
     </Text>

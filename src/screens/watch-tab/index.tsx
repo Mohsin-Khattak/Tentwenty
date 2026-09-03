@@ -1,27 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, ListRenderItem, View } from 'react-native';
+import { FlatList, ListRenderItem, Platform, View } from 'react-native';
 import styles from './styles';
 import AppHeader from '../../components/atoms/app-header';
 import { Loader } from '../../components/atoms/loader';
 import MoviesCard from '../../components/molecules/movies-card';
 import { getUpcomingMovies } from '../../services/api/watch-api-action';
 import { mvs } from '../../config/metrices';
-
-interface Movie {
-  id: number;
-  title: string;
-  poster_path: string | null;
-  backdrop_path: string | null;
-  overview: string;
-  release_date: string;
-}
-
-interface TMDBResponse {
-  page: number;
-  results: Movie[];
-  total_pages: number;
-  total_results: number;
-}
+import { Movie, TMDBResponse } from '../../types/entities-types';
+import MovieCardSkeleton from '../../components/molecules/movie-card-skeleton';
+import { navigate } from '../../navigation/navigation-ref';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '../../config/colors';
 
 const ITEM_HEIGHT = mvs(180);
 const ITEM_MARGIN = mvs(16);
@@ -98,6 +87,7 @@ const WatchTab: React.FC = () => {
         item={item}
         onPress={() => {
           console.log('MOVIE ID:', item.id);
+          navigate('MoviesDetailsScreen', { movieId: item.id });
         }}
       />
     ),
@@ -131,9 +121,16 @@ const WatchTab: React.FC = () => {
       </View>
     );
   }, [pageLoading]);
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
+      <View
+        style={{
+          paddingTop: Platform.OS === 'ios' ? insets?.top : 0,
+          backgroundColor: Platform.OS === 'ios' ? colors.statsbar : null,
+        }}
+      />
       <AppHeader
         title="Watch"
         onSearchPress={() => {
@@ -142,7 +139,11 @@ const WatchTab: React.FC = () => {
       />
 
       {loading ? (
-        <Loader />
+        <View style={styles.skeletonContainer}>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <MovieCardSkeleton key={index} />
+          ))}
+        </View>
       ) : (
         <FlatList
           data={data}

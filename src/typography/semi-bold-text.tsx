@@ -1,8 +1,14 @@
 import React from 'react';
-import {ColorValue, StyleProp, StyleSheet, Text, TextStyle} from 'react-native';
+import {
+  ColorValue,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+} from 'react-native';
 import fonts from '../assets/fonts';
-import {colors} from '../config/colors';
-import {mvs} from '../config/metrices';
+import { colors } from '../config/colors';
+import { mvs } from '../config/metrices';
 type FcProps = {
   label?: string | number;
   numberOfLines?: number;
@@ -15,7 +21,7 @@ type FcProps = {
 const SemiBold: React.FC<FcProps> = ({
   label,
   fontSize,
-  color = colors.black,
+  color = colors.white,
   numberOfLines,
   children,
   style,
@@ -25,7 +31,8 @@ const SemiBold: React.FC<FcProps> = ({
     <Text
       numberOfLines={numberOfLines}
       {...props}
-      style={[{...styles.label, color: color, fontSize: fontSize}, style]}>
+      style={[{ ...styles.label, color: color, fontSize: fontSize }, style]}
+    >
       {label}
       {children}
     </Text>
@@ -38,7 +45,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: fonts.semiBold,
     fontSize: mvs(15),
-    color: colors.secondary, //default color
+    color: colors.white, //default color
     fontWeight: '600',
   },
 });
