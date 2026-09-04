@@ -20,6 +20,7 @@ import Medium from '../../typography/medium-text';
 import Regular from '../../typography/regular-text';
 import styles from './styles';
 import { TrailerModal } from '../../components/atoms/modal/trailermodal';
+import { navigate } from '../../navigation/navigation-ref';
 
 const GENRE_COLORS = ['#15D2BC', '#E26CA5', '#564CA3', '#CD9D0F', '#60C3D8'];
 
@@ -144,7 +145,7 @@ const MoviesDetailsScreen = (props: any) => {
 
               <PrimaryButton
                 title="Get Tickets"
-                onPress={() => console.log('GET TICKETS')}
+                onPress={() => navigate('SeatLayoutScreen', { movieId })}
               />
               <PrimaryButton
                 title={trailerLoading ? 'Loading...' : 'Watch Trailer'}

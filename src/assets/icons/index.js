@@ -7,4 +7,4 @@ export { default as BackIcon } from './back.svg';
 export { default as BackBlackIcon } from './backblack.svg';
 export { default as PlayIcon } from './play.svg';
 export { default as CloseIcon } from './close.svg';
-export { default as ThreedotsIcon } from './threedots.svg';
+export { default as SeatLayout } from './seatlayout.svg';

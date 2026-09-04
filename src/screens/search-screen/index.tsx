@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, Platform, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   getGenresWithImages,
   searchMovies,
@@ -13,7 +20,7 @@ import { Loader } from '../../components/atoms/loader';
 import { navigate } from '../../navigation/navigation-ref';
 import CategoriesCard from '../../components/molecules/categories-card';
 import SearchCard from '../../components/molecules/search-card';
-import { BackBlackIcon, BackIcon } from '../../assets/icons'; // Aap ke project ka Back Icon
+import { BackBlackIcon } from '../../assets/icons';
 
 const SearchScreen = () => {
   const insets = useSafeAreaInsets();
@@ -26,6 +33,11 @@ const SearchScreen = () => {
 
   // Track if search submit/enter key was pressed
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Pagination States
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -52,20 +64,24 @@ const SearchScreen = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Search API Call Effect
+  // Initial Search API Call Effect
   useEffect(() => {
     const handleSearchAPI = async () => {
       if (debouncedQuery.trim() === '') {
         setSearchResults([]);
         setIsSubmitted(false);
+        setPage(1);
+        setTotalPages(1);
         return;
       }
 
       try {
         setLoading(true);
-        const response = await searchMovies(debouncedQuery);
+        setPage(1); // Reset to first page on new query
+        const response = await searchMovies(debouncedQuery, 1);
         console.log('check search response==>', JSON.stringify(response));
         setSearchResults(response?.results || []);
+        setTotalPages(response?.total_pages || 1);
       } catch (error) {
         console.log('Error searching movies:', error);
       } finally {
@@ -76,11 +92,35 @@ const SearchScreen = () => {
     handleSearchAPI();
   }, [debouncedQuery]);
 
+  // Load More Pages Function for Pagination
+  const fetchMoreResults = async () => {
+    if (isFetchingMore || page >= totalPages || debouncedQuery.trim() === '') {
+      return;
+    }
+
+    try {
+      setIsFetchingMore(true);
+      const nextPage = page + 1;
+      const response = await searchMovies(debouncedQuery, nextPage);
+
+      if (response?.results?.length) {
+        setSearchResults(prev => [...prev, ...response.results]);
+        setPage(nextPage);
+      }
+    } catch (error) {
+      console.log('Error fetching more movies:', error);
+    } finally {
+      setIsFetchingMore(false);
+    }
+  };
+
   const handleClear = () => {
     setSearchQuery('');
     setDebouncedQuery('');
     setSearchResults([]);
     setIsSubmitted(false);
+    setPage(1);
+    setTotalPages(1);
   };
 
   const handleBackFromResults = () => {
@@ -117,6 +157,23 @@ const SearchScreen = () => {
     [],
   );
 
+  // Bottom Pagination Loader Function
+  const renderFooter = () => {
+    if (!isFetchingMore) return null;
+    return (
+      <View
+        style={{
+          paddingVertical: 20,
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+        }}
+      >
+        <ActivityIndicator size="large" color={colors.statsbar || '#000000'} />
+      </View>
+    );
+  };
+
   const isSearching = searchQuery.trim().length > 0;
 
   return (
@@ -129,7 +186,7 @@ const SearchScreen = () => {
         }}
       />
 
-      {/* Header Condition: Show "X Results Found" Header if Submitted */}
+      {/* Header Condition */}
       {isSubmitted ? (
         <View style={styles.resultsHeaderContainer}>
           <TouchableOpacity
@@ -162,12 +219,15 @@ const SearchScreen = () => {
           key="search-list"
           data={searchResults}
           renderItem={renderSearchItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
           ListHeaderComponent={
             !isSubmitted ? (
               <Text style={styles.topResultsHeader}>Top Results</Text>
             ) : undefined
           }
+          ListFooterComponent={renderFooter}
+          onEndReached={fetchMoreResults}
+          onEndReachedThreshold={0.1}
           contentContainerStyle={[
             styles.listPadding,
             { paddingBottom: (insets?.bottom || 0) + 70 },

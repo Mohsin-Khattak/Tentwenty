@@ -6,6 +6,8 @@ import RootStackParamList from '../types/navigation-types/root-stack';
 import TabNavigator from './tab-navigation';
 import MoviesDetailsScreen from '../screens/movie-details-screen';
 import SearchScreen from '../screens/search-screen';
+import SeatLayoutScreen from '../screens/seat-layout-screen';
+import SeatSelectScreen from '../screens/seat-select-screen';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
@@ -18,6 +20,8 @@ export const RootNavigator = () => {
       >
         <Stack.Group>
           <Stack.Screen name="BottomTab" component={TabNavigator} />
+          <Stack.Screen name="SeatLayoutScreen" component={SeatLayoutScreen} />
+          <Stack.Screen name="SeatSelectScreen" component={SeatSelectScreen} />
           <Stack.Screen
             name="MoviesDetailsScreen"
             component={MoviesDetailsScreen}
