@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   Dimensions,
   Modal,
@@ -28,6 +28,7 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
   setPlaying,
 }) => {
   const insets = useSafeAreaInsets();
+  const playerRef = useRef<any>(null);
 
   const onStateChange = useCallback(
     (state: string) => {
@@ -45,12 +46,13 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
       animationType="fade"
       transparent={false}
       onRequestClose={onClose}
+      onShow={() => setPlaying(true)}
     >
       <View style={styles.container}>
         <View
           style={[
             styles.topBar,
-            { paddingTop: insets.top > 0 ? insets.top + 10 : 20 },
+            { top: insets.top > 0 ? insets.top + 10 : 20 },
           ]}
         >
           <TouchableOpacity style={styles.doneButton} onPress={onClose}>
@@ -61,21 +63,28 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
         {trailerKey && (
           <View style={styles.playerWrapper}>
             <YoutubePlayer
+              ref={playerRef}
               height={230}
               width={width}
               play={playing}
               videoId={trailerKey}
-              forceAndroidAutoplay={true}
               onChangeState={onStateChange}
+              // Player ready hone par yeh function automatically call hoga aur video play kar dega
+              onReady={() => {
+                setTimeout(() => {
+                  playerRef.current?.playVideo?.();
+                }, 200);
+              }}
               initialPlayerParams={{
                 autoplay: 1,
+                mute: 1, // iOS/Android autoplay policy ke liye mute lazmi hai
                 modestbranding: 1,
                 rel: 0,
                 controls: 0,
               }}
               webViewProps={{
                 allowsInlineMediaPlayback: true,
-                mediaPlaybackRequiresUserAction: false,
+                mediaPlaybackRequiresUserAction: false, // Yeh property WebView ko user tap ke baghair play karne ki ijazat deti hai
               }}
             />
           </View>
@@ -89,12 +98,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   topBar: {
-    width: '100%',
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-    alignItems: 'flex-end',
+    position: 'absolute',
+    right: 20,
     zIndex: 10,
   },
   doneButton: {
@@ -109,7 +118,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   playerWrapper: {
-    flex: 1,
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },

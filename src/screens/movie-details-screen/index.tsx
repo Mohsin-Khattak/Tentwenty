@@ -145,7 +145,7 @@ const MoviesDetailsScreen = (props: any) => {
 
               <PrimaryButton
                 title="Get Tickets"
-                onPress={() => navigate('SeatLayoutScreen', { movieId })}
+                onPress={() => navigate('SeatLayoutScreen')}
               />
               <PrimaryButton
                 title={trailerLoading ? 'Loading...' : 'Watch Trailer'}

@@ -181,8 +181,8 @@ const SearchScreen = () => {
       {/* Top Status Bar Spacer */}
       <View
         style={{
-          paddingTop: Platform.OS === 'ios' ? insets?.top : 20,
-          backgroundColor: colors.statsbar,
+          paddingTop: insets?.top ? insets.top + 5 : 25,
+          backgroundColor: '#FFFFFF',
         }}
       />
 
