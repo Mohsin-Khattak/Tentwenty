@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import {
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Rect, Text as SvgText } from 'react-native-svg';
 import styles from './styles';
@@ -13,6 +17,8 @@ import BackHeader from '../../components/atoms/back-header';
 import { colors } from '../../config/colors';
 import Medium from '../../typography/medium-text';
 import SemiBold from '../../typography/semi-bold-text';
+import { unavailableSeats } from '../../config/constant';
+import { MinusIcon, PlusIcon } from '../../assets/icons';
 
 export interface SelectedSeat {
   id: string;
@@ -21,59 +27,68 @@ export interface SelectedSeat {
   price: number;
 }
 
-const SeatLayout = () => {
+const SeatLayoutScreen = () => {
   const insets = useSafeAreaInsets();
-  const [scale, setScale] = useState<number>(1);
 
-  // Default selected seat matching Figma design (e.g. 3-4)
+  // Shared values for Google Maps style Zooming & Dragging
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
+
+  // Default selected seat matching Screenshot (Gold seat at Row 3, Col 9)
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([
-    { id: '3-4', row: 3, col: 4, price: 50 },
+    { id: '3-9', row: 3, col: 9, price: 50 },
   ]);
 
-  // Unavailable seats list
-  const unavailableSeats = [
-    '1-1',
-    '1-2',
-    '1-5',
-    '1-6',
-    '1-9',
-    '1-10',
-    '1-13',
-    '1-14',
-    '2-2',
-    '2-4',
-    '2-5',
-    '2-6',
-    '2-9',
-    '2-10',
-    '2-13',
-    '2-14',
-    '3-1',
-    '3-3',
-    '3-7',
-    '3-8',
-    '3-11',
-    '3-12',
-    '3-15',
-    '3-16',
-    '4-1',
-    '4-2',
-    '4-4',
-    '4-5',
-    '4-6',
-    '4-9',
-    '4-10',
-    '4-13',
-    '4-14',
-  ];
+  // Exact unavailable (grey) seats mapped from the provided screenshot image
+
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate(e => {
+      const targetScale = savedScale.value * e.scale;
+      if (targetScale >= 0.8 && targetScale <= 3) {
+        scale.value = targetScale;
+      }
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+    });
+
+  const panGesture = Gesture.Pan()
+    .onUpdate(e => {
+      translateX.value = savedTranslateX.value + e.translationX;
+      translateY.value = savedTranslateY.value + e.translationY;
+    })
+    .onEnd(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+    });
+
+  const composedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
 
   const handleZoomIn = () => {
-    if (scale < 1.8) setScale(prev => prev + 0.2);
+    if (scale.value < 2.5) {
+      scale.value = withTiming(scale.value + 0.3);
+      savedScale.value += 0.3;
+    }
   };
 
   const handleZoomOut = () => {
-    if (scale > 0.7) setScale(prev => prev - 0.2);
+    if (scale.value > 0.8) {
+      scale.value = withTiming(scale.value - 0.3);
+      savedScale.value -= 0.3;
+    }
   };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
 
   const isSelected = (id: string) => selectedSeats.some(s => s.id === id);
   const isUnavailable = (id: string) => unavailableSeats.includes(id);
@@ -97,12 +112,11 @@ const SeatLayout = () => {
 
   const getSeatColor = (id: string, isVIP = false) => {
     if (isSelected(id)) return '#CD9D0F'; // Gold (Selected)
-    if (isUnavailable(id)) return 'rgba(166, 166, 166, 0.5)'; // Gray (Not Available)
-    if (isVIP) return '#564CA3'; // VIP Blue/Purple
-    return '#61C3F2'; // Regular Cyan
+    if (isUnavailable(id)) return '#D8D8D8'; // Gray (Unavailable)
+    if (isVIP) return '#564CA3'; // VIP Dark Blue/Purple
+    return '#61C3F2'; // Regular Blue
   };
 
-  // Helper component to render Figma seat rects with click actions
   const renderInteractiveSVGSeat = (
     id: string,
     row: number,
@@ -115,23 +129,21 @@ const SeatLayout = () => {
 
     return (
       <React.Fragment key={`seat-${id}`}>
-        {/* Main Seat Box */}
         <Rect
           x={x}
           y={y}
-          width={6.98}
-          height={5.23}
-          rx={0.98}
+          width={7.5}
+          height={5.5}
+          rx={1.2}
           fill={seatColor}
           onPress={() => toggleSeat(id, row, col, isVIP)}
         />
-        {/* Seat Cushion/Bottom Bar */}
         <Rect
-          x={x + 1}
-          y={y + 5.5}
-          width={4.88}
-          height={1.04}
-          rx={0.52}
+          x={x + 0.8}
+          y={y + 6}
+          width={5.9}
+          height={1.3}
+          rx={0.6}
           fill={seatColor}
           onPress={() => toggleSeat(id, row, col, isVIP)}
         />
@@ -140,7 +152,7 @@ const SeatLayout = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <View
         style={{
           paddingTop: Platform.OS === 'ios' ? insets.top : 20,
@@ -153,128 +165,115 @@ const SeatLayout = () => {
         subtitle="March 5, 2021 | 12:30 Hall 1"
       />
 
-      {/* Main Seat Canvas */}
       <View style={styles.mappingArea}>
-        <ScrollView
-          horizontal
-          bounces={false}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalScrollContent}
-        >
-          <ScrollView
-            bounces={false}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.verticalScrollContent}
+        <GestureDetector gesture={composedGesture}>
+          <Animated.View
+            style={[
+              { flex: 1, alignItems: 'center', justifyContent: 'center' },
+              animatedStyle,
+            ]}
           >
-            <View style={{ transform: [{ scale }], padding: 20 }}>
-              {/* Exact SVG viewBox from Figma Export */}
-              <Svg width={329} height={190} viewBox="0 0 329 190">
-                {/* Cinema Screen Curve */}
-                <Path
-                  d="M 20 20 Q 164.5 0 309 20"
-                  stroke="#61C3F2"
-                  strokeWidth={1.5}
-                  fill="none"
-                />
-                <SvgText
-                  x="164.5"
-                  y="32"
-                  fontSize="7"
-                  fill="#8F8996"
-                  textAnchor="middle"
-                  letterSpacing="2"
-                  fontWeight="600"
-                >
-                  SCREEN
-                </SvgText>
+            {/* ViewBox adjusted slightly for perfect center alignment */}
+            <Svg width={380} height={230} viewBox="0 0 380 230">
+              <Path
+                d="M 40 25 Q 190 0 340 25"
+                stroke="#61C3F2"
+                strokeWidth={1.8}
+                fill="none"
+              />
+              <SvgText
+                x="190"
+                y="38"
+                fontSize="8"
+                fill="#8F8996"
+                textAnchor="middle"
+                letterSpacing="2.5"
+                fontWeight="bold"
+              >
+                SCREEN
+              </SvgText>
 
-                {/* SVG Interactive Seats Mapping */}
-                {Array.from({ length: 10 }).map((_, rIdx) => {
-                  const rowNum = rIdx + 1;
-                  const yPos = 44 + rIdx * 12;
-                  const isVIPRow = rowNum === 10;
+              {/* Rows and Seats Rendering */}
+              {Array.from({ length: 10 }).map((_, rIdx) => {
+                const rowNum = rIdx + 1;
+                const yPos = 52 + rIdx * 16;
+                const isVIPRow = rowNum === 10;
 
-                  return (
-                    <React.Fragment key={`svg-row-${rowNum}`}>
-                      {/* Left Block Seats */}
-                      {renderInteractiveSVGSeat(
-                        `${rowNum}-1`,
+                return (
+                  <React.Fragment key={`svg-row-${rowNum}`}>
+                    <SvgText
+                      x="20"
+                      y={yPos + 5.5}
+                      fontSize="8"
+                      fill="#202C43"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                    >
+                      {rowNum}
+                    </SvgText>
+
+                    {/* 24 Total Columns across 3 Blocks (5 Left, 14 Middle, 5 Right) */}
+                    {Array.from({ length: 24 }).map((_, cIdx) => {
+                      const colNum = cIdx + 1;
+
+                      // Handle missing seats in top rows (Empty spaces matching screenshot)
+                      let shouldRender = true;
+                      if (rowNum === 1 && (colNum <= 3 || colNum >= 22))
+                        shouldRender = false;
+                      if (
+                        (rowNum === 2 || rowNum === 3 || rowNum === 4) &&
+                        (colNum === 1 || colNum === 24)
+                      )
+                        shouldRender = false;
+
+                      if (!shouldRender) return null;
+
+                      // Block X Pos Calculation with 15px gap between blocks
+                      let xPos = 40;
+                      if (colNum <= 5) {
+                        xPos += (colNum - 1) * 11;
+                      } else if (colNum <= 19) {
+                        xPos += 5 * 11 + 15 + (colNum - 6) * 11;
+                      } else {
+                        xPos += 5 * 11 + 15 + 14 * 11 + 15 + (colNum - 20) * 11;
+                      }
+
+                      return renderInteractiveSVGSeat(
+                        `${rowNum}-${colNum}`,
                         rowNum,
-                        1,
-                        38,
+                        colNum,
+                        xPos,
                         yPos,
                         isVIPRow,
-                      )}
-                      {renderInteractiveSVGSeat(
-                        `${rowNum}-2`,
-                        rowNum,
-                        2,
-                        51,
-                        yPos,
-                        isVIPRow,
-                      )}
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              })}
+            </Svg>
+          </Animated.View>
+        </GestureDetector>
 
-                      {/* Middle Block Seats */}
-                      {Array.from({ length: 12 }).map((_, cIdx) => {
-                        const colNum = cIdx + 3;
-                        const xPos = 77 + cIdx * 13;
-                        return renderInteractiveSVGSeat(
-                          `${rowNum}-${colNum}`,
-                          rowNum,
-                          colNum,
-                          xPos,
-                          yPos,
-                          isVIPRow,
-                        );
-                      })}
-
-                      {/* Right Block Seats */}
-                      {renderInteractiveSVGSeat(
-                        `${rowNum}-15`,
-                        rowNum,
-                        15,
-                        270,
-                        yPos,
-                        isVIPRow,
-                      )}
-                      {renderInteractiveSVGSeat(
-                        `${rowNum}-16`,
-                        rowNum,
-                        16,
-                        283,
-                        yPos,
-                        isVIPRow,
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </Svg>
-            </View>
-          </ScrollView>
-        </ScrollView>
-
-        {/* Zoom Action Buttons */}
         <View style={styles.zoomContainer}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={handleZoomIn}
             style={styles.zoomButton}
           >
-            <Text style={styles.zoomText}>+</Text>
+            <PlusIcon />
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={handleZoomOut}
             style={styles.zoomButton}
           >
-            <Text style={styles.zoomText}>−</Text>
+            <MinusIcon />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.dividerLine} />
 
-      {/* Bottom Sheet Details */}
       <View
         style={[
           styles.bottomSheet,
@@ -287,12 +286,7 @@ const SeatLayout = () => {
             <Medium style={styles.legendLabel}>Selected</Medium>
           </View>
           <View style={styles.legendItem}>
-            <View
-              style={[
-                styles.legendSeat,
-                { backgroundColor: 'rgba(166, 166, 166, 0.5)' },
-              ]}
-            />
+            <View style={[styles.legendSeat, { backgroundColor: '#D8D8D8' }]} />
             <Medium style={styles.legendLabel}>Not available</Medium>
           </View>
           <View style={styles.legendItem}>
@@ -305,9 +299,8 @@ const SeatLayout = () => {
           </View>
         </View>
 
-        {/* Selected Seat Tags Chip */}
         {selectedSeats.length > 0 && (
-          <ScrollView
+          <Animated.ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.tagsScrollView}
@@ -322,7 +315,7 @@ const SeatLayout = () => {
                 </TouchableOpacity>
               </View>
             ))}
-          </ScrollView>
+          </Animated.ScrollView>
         )}
 
         <View style={styles.footerRow}>
@@ -336,8 +329,8 @@ const SeatLayout = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </GestureHandlerRootView>
   );
 };
 
-export default SeatLayout;
+export default SeatLayoutScreen;

@@ -1,18 +1,19 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
-import { colors } from '../config/colors';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RootStackParamList from '../types/navigation-types/root-stack';
 import TabNavigator from './tab-navigation';
 import MoviesDetailsScreen from '../screens/movie-details-screen';
 import SearchScreen from '../screens/search-screen';
 import SeatLayoutScreen from '../screens/seat-layout-screen';
 import SeatSelectScreen from '../screens/seat-select-screen';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <StatusBar barStyle={'dark-content'} />
       <Stack.Navigator
         initialRouteName="BottomTab"
@@ -26,11 +27,15 @@ export const RootNavigator = () => {
             name="MoviesDetailsScreen"
             component={MoviesDetailsScreen}
           />
+          {/* <Stack.Screen name="SearchScreen" component={SearchScreen} /> */}
         </Stack.Group>
       </Stack.Navigator>
-    </View>
+    </GestureHandlerRootView>
   );
 };
+
+// Added default export so both import styles work
+export default RootNavigator;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

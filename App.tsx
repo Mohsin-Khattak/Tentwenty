@@ -3,7 +3,8 @@ import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import './src/config/axios-interceptor';
 import { navigationRef } from './src/navigation/navigation-ref';
-import { RootNavigator } from './src/navigation/root-navigation';
+// Bracket {} hata kar Default Import use karein
+import RootNavigator from './src/navigation/root-navigation';
 
 const App = () => {
   return (
@@ -14,4 +15,5 @@ const App = () => {
     </SafeAreaProvider>
   );
 };
+
 export default App;

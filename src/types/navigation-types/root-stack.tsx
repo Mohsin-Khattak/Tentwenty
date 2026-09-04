@@ -3,5 +3,6 @@ type RootStackParamList = {
   MoviesDetailsScreen: undefined;
   SeatLayoutScreen: undefined;
   SeatSelectScreen: undefined;
+  SearchScreen: undefined;
 };
 export default RootStackParamList;

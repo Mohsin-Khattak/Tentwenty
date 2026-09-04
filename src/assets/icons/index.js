@@ -8,3 +8,6 @@ export { default as BackBlackIcon } from './backblack.svg';
 export { default as PlayIcon } from './play.svg';
 export { default as CloseIcon } from './close.svg';
 export { default as SeatLayout } from './seatlayout.svg';
+export { default as ThreedotsIcon } from './threedots.svg';
+export { default as PlusIcon } from './plus.svg';
+export { default as MinusIcon } from './minus.svg';
