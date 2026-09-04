@@ -117,7 +117,7 @@ const MoviesDetailsScreen = (props: any) => {
               priority: FastImage.priority.high,
               cache: FastImage.cacheControl.immutable,
             }}
-            style={styles.headerImage}
+            style={[styles.headerImage as any]}
             resizeMode={FastImage.resizeMode.cover}
           />
 
