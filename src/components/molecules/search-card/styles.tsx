@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 
 import { mvs } from '../../../config/metrices';
-import { colors } from '../../../config/colors';
 
 const styles = StyleSheet.create({
   container: {
@@ -25,6 +24,8 @@ const styles = StyleSheet.create({
     color: '#202C43',
     fontSize: mvs(16),
   },
+  orignalTitle: { marginTop: 10 },
+  aboutContianer: { flex: 1 },
 });
 
 export default styles;

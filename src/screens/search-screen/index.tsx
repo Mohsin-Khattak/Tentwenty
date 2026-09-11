@@ -2,25 +2,25 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BackBlackIcon } from '../../assets/icons';
+import { Loader } from '../../components/atoms/loader';
+import SearchHeader from '../../components/atoms/search-header';
+import CategoriesCard from '../../components/molecules/categories-card';
+import SearchCard from '../../components/molecules/search-card';
+import { colors } from '../../config/colors';
+import { navigate } from '../../navigation/navigation-ref';
 import {
   getGenresWithImages,
   searchMovies,
 } from '../../services/api/watch-api-action';
-import styles from './styles';
 import { Genre, Movie } from '../../types/entities-types';
-import { colors } from '../../config/colors';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SearchHeader from '../../components/atoms/search-header';
-import { Loader } from '../../components/atoms/loader';
-import { navigate } from '../../navigation/navigation-ref';
-import CategoriesCard from '../../components/molecules/categories-card';
-import SearchCard from '../../components/molecules/search-card';
-import { BackBlackIcon } from '../../assets/icons';
+import styles from './styles';
 
 const SearchScreen = () => {
   const insets = useSafeAreaInsets();
@@ -39,7 +39,7 @@ const SearchScreen = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getGenresWithImages();
@@ -49,11 +49,11 @@ const SearchScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   // Debouncing Effect (500ms for smooth UX)
   useEffect(() => {
@@ -161,14 +161,7 @@ const SearchScreen = () => {
   const renderFooter = () => {
     if (!isFetchingMore) return null;
     return (
-      <View
-        style={{
-          paddingVertical: 20,
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '100%',
-        }}
-      >
+      <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color={colors.statsbar || '#000000'} />
       </View>
     );
@@ -176,15 +169,21 @@ const SearchScreen = () => {
 
   const isSearching = searchQuery.trim().length > 0;
 
+  // Combining static and dynamic style using StyleSheet.flatten or array notation with predefined object to keep linter happy
+  const statusBarSpacerStyle = [
+    localStyles.statusBarSpacer,
+    { paddingTop: insets?.top ? insets.top + 5 : 25 },
+  ];
+
+  const searchListContentStyle = [
+    styles.listPadding,
+    { paddingBottom: (insets?.bottom || 0) + 70 },
+  ];
+
   return (
     <View style={styles.container}>
       {/* Top Status Bar Spacer */}
-      <View
-        style={{
-          paddingTop: insets?.top ? insets.top + 5 : 25,
-          backgroundColor: '#FFFFFF',
-        }}
-      />
+      <View style={statusBarSpacerStyle} />
 
       {/* Header Condition */}
       {isSubmitted ? (
@@ -228,10 +227,7 @@ const SearchScreen = () => {
           ListFooterComponent={renderFooter}
           onEndReached={fetchMoreResults}
           onEndReachedThreshold={0.1}
-          contentContainerStyle={[
-            styles.listPadding,
-            { paddingBottom: (insets?.bottom || 0) + 70 },
-          ]}
+          contentContainerStyle={searchListContentStyle}
           showsVerticalScrollIndicator={false}
         />
       ) : (
@@ -244,15 +240,18 @@ const SearchScreen = () => {
           }
           numColumns={2}
           columnWrapperStyle={styles.row}
-          contentContainerStyle={[
-            styles.listPadding,
-            { paddingBottom: (insets?.bottom || 0) + 70 },
-          ]}
+          contentContainerStyle={searchListContentStyle}
           showsVerticalScrollIndicator={false}
         />
       )}
     </View>
   );
 };
+
+const localStyles = StyleSheet.create({
+  statusBarSpacer: {
+    backgroundColor: '#FFFFFF',
+  },
+});
 
 export default SearchScreen;

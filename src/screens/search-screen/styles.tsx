@@ -42,5 +42,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#202C43',
   },
+  loaderContainer: {
+    paddingVertical: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
 });
 export default styles;

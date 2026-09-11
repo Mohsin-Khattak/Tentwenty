@@ -130,6 +130,15 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
   },
+  animateeContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedColor: { backgroundColor: '#CD9D0F' },
+  notAvailableColor: { backgroundColor: '#D8D8D8' },
+  vipColor: { backgroundColor: '#564CA3' },
+  regularColor: { backgroundColor: '#61C3F2' },
 });
 
 export default styles;

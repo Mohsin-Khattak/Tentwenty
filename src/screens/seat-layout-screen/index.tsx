@@ -1,15 +1,14 @@
-import React, { useMemo, useState } from 'react';
-import { FlatList, Platform, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import moment from 'moment';
-import HallCard, { HallData } from '../../components/molecules/hall-card';
-import styles from './styles';
+import React, { useMemo, useState } from 'react';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BackHeader from '../../components/atoms/back-header';
-import { colors } from '../../config/colors';
+import { PrimaryButton } from '../../components/atoms/button/primary-button';
+import HallCard, { HallData } from '../../components/molecules/hall-card';
+import { navigate } from '../../navigation/navigation-ref';
 import Medium from '../../typography/medium-text';
 import SemiBold from '../../typography/semi-bold-text';
-import { PrimaryButton } from '../../components/atoms/button/primary-button';
-import { navigate } from '../../navigation/navigation-ref';
+import styles from './styles';
 
 interface DateItem {
   id: string;
@@ -36,7 +35,6 @@ const DUMMY_HALLS: HallData[] = [
 const SeatLayoutScreen = () => {
   const insets = useSafeAreaInsets();
 
-  // Moment ka use karke aj se agle 30 dino ki dates dynamically generate ki hain
   const monthDates: DateItem[] = useMemo(() => {
     const dates: DateItem[] = [];
     const today = moment();
@@ -45,7 +43,7 @@ const SeatLayoutScreen = () => {
       const dateObj = today.clone().add(i, 'days');
       dates.push({
         id: dateObj.format('YYYY-MM-DD'),
-        date: dateObj.format('D MMM'), // Result format: "5 Mar"
+        date: dateObj.format('D MMM'),
       });
     }
     return dates;
@@ -56,14 +54,19 @@ const SeatLayoutScreen = () => {
   );
   const [selectedHall, setSelectedHall] = useState<string>('1');
 
+  const statusBarSpacerStyle = [
+    localStyles.statusBarSpacer,
+    { paddingTop: insets?.top ? insets.top + 5 : 25 },
+  ];
+
+  const bottomContainerStyle = [
+    styles.bottomContainer,
+    { marginBottom: insets.bottom > 0 ? insets.bottom : 10 },
+  ];
+
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          paddingTop: insets?.top ? insets.top + 5 : 25,
-          backgroundColor: '#FFFFFF',
-        }}
-      />
+      <View style={statusBarSpacerStyle} />
 
       <BackHeader
         title="The King’s Man"
@@ -71,7 +74,6 @@ const SeatLayoutScreen = () => {
       />
 
       <View style={styles.content}>
-        {/* Dynamic Date Selector */}
         <Medium style={styles.sectionTitle} label={'Date'} />
         <FlatList
           horizontal
@@ -100,7 +102,6 @@ const SeatLayoutScreen = () => {
           }}
         />
 
-        {/* Cinema Halls Horizontal List */}
         <FlatList
           horizontal
           data={DUMMY_HALLS}
@@ -117,13 +118,7 @@ const SeatLayoutScreen = () => {
         />
       </View>
 
-      {/* Bottom Select Seats Button */}
-      <View
-        style={[
-          styles.bottomContainer,
-          { marginBottom: insets.bottom > 0 ? insets.bottom : 10 },
-        ]}
-      >
+      <View style={bottomContainerStyle}>
         <PrimaryButton
           onPress={() => {
             navigate('SeatSelectScreen');
@@ -134,5 +129,11 @@ const SeatLayoutScreen = () => {
     </View>
   );
 };
+
+const localStyles = StyleSheet.create({
+  statusBarSpacer: {
+    backgroundColor: '#FFFFFF',
+  },
+});
 
 export default SeatLayoutScreen;

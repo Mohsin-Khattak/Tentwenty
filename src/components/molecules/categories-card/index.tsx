@@ -1,10 +1,10 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
-import styles from './styles';
-import Medium from '../../../typography/medium-text';
 import { Genre } from '../../../types/entities-types';
+import Medium from '../../../typography/medium-text';
+import styles from './styles';
 
 interface CategoriesCardProps {
   item: Genre;

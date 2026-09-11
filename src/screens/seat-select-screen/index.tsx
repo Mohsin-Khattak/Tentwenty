@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import {
   Gesture,
   GestureDetector,
@@ -12,13 +12,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Rect, Text as SvgText } from 'react-native-svg';
-import styles from './styles';
+import { MinusIcon, PlusIcon } from '../../assets/icons';
 import BackHeader from '../../components/atoms/back-header';
-import { colors } from '../../config/colors';
+import { unavailableSeats } from '../../config/constant';
 import Medium from '../../typography/medium-text';
 import SemiBold from '../../typography/semi-bold-text';
-import { unavailableSeats } from '../../config/constant';
-import { MinusIcon, PlusIcon } from '../../assets/icons';
+import styles from './styles';
 
 export interface SelectedSeat {
   id: string;
@@ -150,15 +149,13 @@ const SeatLayoutScreen = () => {
       </React.Fragment>
     );
   };
-
+  const statusBarSpacerStyle = {
+    paddingTop: insets?.top ? insets.top + 5 : 25,
+    backgroundColor: '#FFFFFF',
+  };
   return (
     <GestureHandlerRootView style={styles.container}>
-      <View
-        style={{
-          paddingTop: insets?.top ? insets.top + 5 : 25,
-          backgroundColor: '#FFFFFF',
-        }}
-      />
+      <View style={statusBarSpacerStyle} />
 
       <BackHeader
         title="The King’s Man"
@@ -167,12 +164,7 @@ const SeatLayoutScreen = () => {
 
       <View style={styles.mappingArea}>
         <GestureDetector gesture={composedGesture}>
-          <Animated.View
-            style={[
-              { flex: 1, alignItems: 'center', justifyContent: 'center' },
-              animatedStyle,
-            ]}
-          >
+          <Animated.View style={[styles.animateeContainer, animatedStyle]}>
             {/* ViewBox adjusted slightly for perfect center alignment */}
             <Svg width={380} height={230} viewBox="0 0 380 230">
               <Path
@@ -213,7 +205,7 @@ const SeatLayoutScreen = () => {
                     </SvgText>
 
                     {/* 24 Total Columns across 3 Blocks (5 Left, 14 Middle, 5 Right) */}
-                    {Array.from({ length: 24 }).map((_, cIdx) => {
+                    {Array.from({ length: 24 }).map((__, cIdx) => {
                       const colNum = cIdx + 1;
 
                       // Handle missing seats in top rows (Empty spaces matching screenshot)
@@ -282,19 +274,19 @@ const SeatLayoutScreen = () => {
       >
         <View style={styles.legendGrid}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendSeat, { backgroundColor: '#CD9D0F' }]} />
+            <View style={[styles.legendSeat, styles.selectedColor]} />
             <Medium style={styles.legendLabel}>Selected</Medium>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendSeat, { backgroundColor: '#D8D8D8' }]} />
+            <View style={[styles.legendSeat, styles.notAvailableColor]} />
             <Medium style={styles.legendLabel}>Not available</Medium>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendSeat, { backgroundColor: '#564CA3' }]} />
+            <View style={[styles.legendSeat, styles.vipColor]} />
             <Medium style={styles.legendLabel}>VIP (150$)</Medium>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendSeat, { backgroundColor: '#61C3F2' }]} />
+            <View style={[styles.legendSeat, styles.regularColor]} />
             <Medium style={styles.legendLabel}>Regular (50 $)</Medium>
           </View>
         </View>

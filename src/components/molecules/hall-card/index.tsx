@@ -31,7 +31,7 @@ const HallCard: React.FC<HallCardProps> = ({ item, isSelected, onSelect }) => {
       </View>
 
       <View style={[styles.cardBox, isSelected && styles.selectedCardBox]}>
-        <Image style={{ width: 144, height: 110 }} source={SeatsImage} />
+        <Image style={styles.seatImage} source={SeatsImage} />
       </View>
 
       <Text style={styles.priceText}>
@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  seatImage: { width: 144, height: 110 },
   timeText: {
     fontSize: 12,
     color: '#202C43',

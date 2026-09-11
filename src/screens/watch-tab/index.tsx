@@ -1,16 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, ListRenderItem, Platform, View } from 'react-native';
-import styles from './styles';
+import { FlatList, ListRenderItem, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppHeader from '../../components/atoms/app-header';
 import { Loader } from '../../components/atoms/loader';
-import MoviesCard from '../../components/molecules/movies-card';
-import { getUpcomingMovies } from '../../services/api/watch-api-action';
-import { mvs } from '../../config/metrices';
-import { Movie, TMDBResponse } from '../../types/entities-types';
 import MovieCardSkeleton from '../../components/molecules/movie-card-skeleton';
+import MoviesCard from '../../components/molecules/movies-card';
+import { mvs } from '../../config/metrices';
 import { navigate } from '../../navigation/navigation-ref';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '../../config/colors';
+import { getUpcomingMovies } from '../../services/api/watch-api-action';
+import { Movie, TMDBResponse } from '../../types/entities-types';
+import styles from './styles';
 
 const ITEM_HEIGHT = mvs(180);
 const ITEM_MARGIN = mvs(16);
@@ -38,10 +37,6 @@ const WatchTab: React.FC = () => {
 
       const response: TMDBResponse = await getUpcomingMovies(page);
 
-      console.log('CURRENT PAGE:', response.page);
-      console.log('LAST PAGE:', response.total_pages);
-      console.log('RESULTS:', response.results.length);
-
       if (page === 1) {
         const uniqueMovies = response.results.filter(
           (movie, index, self) =>
@@ -56,8 +51,6 @@ const WatchTab: React.FC = () => {
           const newMovies = response.results.filter(
             movie => !existingIds.has(movie.id),
           );
-
-          console.log('NEW MOVIES:', newMovies.length);
 
           return [...prevData, ...newMovies];
         });
@@ -96,11 +89,6 @@ const WatchTab: React.FC = () => {
 
   const keyExtractor = useCallback((item: Movie) => item.id.toString(), []);
 
-  /**
-   * Since every movie card has a fixed height
-   * and fixed bottom margin, FlatList can calculate
-   * item positions without measuring every item.
-   */
   const getItemLayout = useCallback(
     (_data: ArrayLike<Movie> | null | undefined, index: number) => ({
       length: ITEM_SIZE,
@@ -122,16 +110,13 @@ const WatchTab: React.FC = () => {
     );
   }, [pageLoading]);
   const insets = useSafeAreaInsets();
-
+  const statusBarSpacerStyle = {
+    paddingTop: insets?.top ? insets.top + 5 : 25,
+    backgroundColor: '#FFFFFF',
+  };
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          paddingTop: insets?.top ? insets.top + 5 : 25,
-          backgroundColor: '#FFFFFF',
-        }}
-      />
-
+      <View style={statusBarSpacerStyle} />
       <AppHeader
         title="Watch"
         onSearchPress={() => {

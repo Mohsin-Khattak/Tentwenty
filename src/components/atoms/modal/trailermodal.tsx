@@ -30,6 +30,11 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
   const insets = useSafeAreaInsets();
   const playerRef = useRef<any>(null);
 
+  // Dynamic top bar style calculate kar rahe hain taake inline code messy na lage
+  const dynamicTopBarStyles = {
+    top: insets.top > 0 ? insets.top + 10 : 20,
+  };
+
   const onStateChange = useCallback(
     (state: string) => {
       if (state === 'ended') {
@@ -49,12 +54,7 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
       onShow={() => setPlaying(true)}
     >
       <View style={styles.container}>
-        <View
-          style={[
-            styles.topBar,
-            { top: insets.top > 0 ? insets.top + 10 : 20 },
-          ]}
-        >
+        <View style={[styles.topBar, dynamicTopBarStyles]}>
           <TouchableOpacity style={styles.doneButton} onPress={onClose}>
             <Text style={styles.doneText}>Done</Text>
           </TouchableOpacity>
@@ -69,7 +69,6 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
               play={playing}
               videoId={trailerKey}
               onChangeState={onStateChange}
-              // Player ready hone par yeh function automatically call hoga aur video play kar dega
               onReady={() => {
                 setTimeout(() => {
                   playerRef.current?.playVideo?.();
@@ -77,14 +76,14 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
               }}
               initialPlayerParams={{
                 autoplay: 1,
-                mute: 1, // iOS/Android autoplay policy ke liye mute lazmi hai
+                mute: 1,
                 modestbranding: 1,
                 rel: 0,
                 controls: 0,
               }}
               webViewProps={{
                 allowsInlineMediaPlayback: true,
-                mediaPlaybackRequiresUserAction: false, // Yeh property WebView ko user tap ke baghair play karne ki ijazat deti hai
+                mediaPlaybackRequiresUserAction: false,
               }}
             />
           </View>

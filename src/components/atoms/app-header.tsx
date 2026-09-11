@@ -1,16 +1,9 @@
 import React from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SearchIcon } from '../../assets/icons';
-import Regular from '../../typography/regular-text';
-import Medium from '../../typography/medium-text';
-import { mvs } from '../../config/metrices';
 import { colors } from '../../config/colors';
+import { mvs } from '../../config/metrices';
+import Medium from '../../typography/medium-text';
 
 interface AppHeaderProps {
   title: string;

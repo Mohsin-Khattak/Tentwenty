@@ -1,11 +1,5 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ColorValue,
-} from 'react-native';
 import React from 'react';
+import { ActivityIndicator, ColorValue, StyleSheet, View } from 'react-native';
 import { colors } from '../../../config/colors';
 
 type props = {

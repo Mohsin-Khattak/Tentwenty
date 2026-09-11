@@ -77,7 +77,9 @@ export const getGenresWithImages = async () => {
             ? `https://image.tmdb.org/t/p/w500${imagePath}`
             : null,
         };
-      } catch (error) {
+      } catch (error: any) {
+        console.log('error check==>', error);
+
         return {
           id: genre.id,
           name: genre.name,

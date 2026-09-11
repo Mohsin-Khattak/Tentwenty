@@ -1,9 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { BackBlackIcon, SearchIcon } from '../../assets/icons';
-import { colors } from '../../config/colors';
-import { mvs } from '../../config/metrices';
-import Medium from '../../typography/medium-text';
+import { BackBlackIcon } from '../../assets/icons';
 import { goBack } from '../../navigation/navigation-ref';
 
 interface AppHeaderProps {
@@ -21,7 +18,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ title, subtitle }) => {
         <Text style={styles.movieTitle}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
-      <View></View>
+      <View />
     </View>
   );
 };

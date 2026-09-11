@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -10,6 +10,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackIcon, PlayIcon } from '../../assets/icons';
 import { PrimaryButton } from '../../components/atoms/button/primary-button';
 
+import { TrailerModal } from '../../components/atoms/modal/trailermodal';
+import { navigate } from '../../navigation/navigation-ref';
 import {
   getMovieDetails,
   getMovieVideos,
@@ -19,8 +21,6 @@ import Bold from '../../typography/bold-text';
 import Medium from '../../typography/medium-text';
 import Regular from '../../typography/regular-text';
 import styles from './styles';
-import { TrailerModal } from '../../components/atoms/modal/trailermodal';
-import { navigate } from '../../navigation/navigation-ref';
 
 const GENRE_COLORS = ['#15D2BC', '#E26CA5', '#564CA3', '#CD9D0F', '#60C3D8'];
 
@@ -37,7 +37,7 @@ const MoviesDetailsScreen = (props: any) => {
 
   const insets = useSafeAreaInsets();
 
-  const getDetails = async () => {
+  const getDetails = useCallback(async () => {
     try {
       const response = await getMovieDetails(movieId);
       setData(response);
@@ -46,7 +46,7 @@ const MoviesDetailsScreen = (props: any) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [movieId]);
 
   const getVideoTrailer = async () => {
     try {
@@ -81,7 +81,7 @@ const MoviesDetailsScreen = (props: any) => {
 
   useEffect(() => {
     getDetails();
-  }, []);
+  }, [getDetails]);
 
   if (loading) {
     return (
@@ -103,6 +103,10 @@ const MoviesDetailsScreen = (props: any) => {
       })
     : '';
 
+  const dynamicOverlayStyle = {
+    paddingTop: insets.top > 0 ? insets.top + 10 : 20,
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -121,12 +125,7 @@ const MoviesDetailsScreen = (props: any) => {
             resizeMode={FastImage.resizeMode.cover}
           />
 
-          <View
-            style={[
-              styles.overlay,
-              { paddingTop: insets.top > 0 ? insets.top + 10 : 20 },
-            ]}
-          >
+          <View style={[styles.overlay, dynamicOverlayStyle]}>
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => props.navigation?.goBack()}
