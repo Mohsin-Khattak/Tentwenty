@@ -79,7 +79,6 @@ const SearchScreen = () => {
         setLoading(true);
         setPage(1); // Reset to first page on new query
         const response = await searchMovies(debouncedQuery, 1);
-        console.log('check search response==>', JSON.stringify(response));
         setSearchResults(response?.results || []);
         setTotalPages(response?.total_pages || 1);
       } catch (error) {

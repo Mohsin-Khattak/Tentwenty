@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, ListRenderItem, View } from 'react-native';
+import React, { useCallback } from 'react';
+import { Button, FlatList, ListRenderItem, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import AppHeader from '../../components/atoms/app-header';
 import { Loader } from '../../components/atoms/loader';
 import MovieCardSkeleton from '../../components/molecules/movie-card-skeleton';
@@ -8,7 +9,7 @@ import MoviesCard from '../../components/molecules/movies-card';
 import { mvs } from '../../config/metrices';
 import { navigate } from '../../navigation/navigation-ref';
 import { getUpcomingMovies } from '../../services/api/watch-api-action';
-import { Movie, TMDBResponse } from '../../types/entities-types';
+import { Movie } from '../../types/entities-types';
 import styles from './styles';
 
 const ITEM_HEIGHT = mvs(180);
@@ -16,71 +17,57 @@ const ITEM_MARGIN = mvs(16);
 const ITEM_SIZE = ITEM_HEIGHT + ITEM_MARGIN;
 
 const WatchTab: React.FC = () => {
-  const [data, setData] = useState<Movie[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
+  const insets = useSafeAreaInsets();
 
-  const [loading, setLoading] = useState(true);
-  const [pageLoading, setPageLoading] = useState(false);
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['upcomingMovies'],
 
-  useEffect(() => {
-    loadMovies(1, true);
-  }, []);
+    queryFn: ({ pageParam }) => getUpcomingMovies(pageParam),
 
-  const loadMovies = async (page: number, initialLoad: boolean = false) => {
-    try {
-      if (initialLoad) {
-        setLoading(true);
-      } else {
-        setPageLoading(true);
+    initialPageParam: 1,
+
+    getNextPageParam: lastPage => {
+      if (lastPage.page >= lastPage.total_pages) {
+        return undefined;
       }
 
-      const response: TMDBResponse = await getUpcomingMovies(page);
+      return lastPage.page + 1;
+    },
+  });
 
-      if (page === 1) {
-        const uniqueMovies = response.results.filter(
-          (movie, index, self) =>
-            index === self.findIndex(item => item.id === movie.id),
-        );
-
-        setData(uniqueMovies);
-      } else {
-        setData(prevData => {
-          const existingIds = new Set(prevData.map(movie => movie.id));
-
-          const newMovies = response.results.filter(
-            movie => !existingIds.has(movie.id),
-          );
-
-          return [...prevData, ...newMovies];
-        });
-      }
-
-      setCurrentPage(response.page);
-      setLastPage(response.total_pages);
-    } catch (error) {
-      console.log('TMDB ERROR:', error);
-    } finally {
-      setLoading(false);
-      setPageLoading(false);
-    }
-  };
+  const movies = Array.from(
+    new Map(
+      (data?.pages.flatMap(page => page.results) ?? []).map(movie => [
+        movie.id,
+        movie,
+      ]),
+    ).values(),
+  );
 
   const handleLoadMore = useCallback(() => {
-    if (loading || pageLoading || currentPage >= lastPage) {
+    if (!hasNextPage || isFetchingNextPage) {
       return;
     }
 
-    loadMovies(currentPage + 1);
-  }, [loading, pageLoading, currentPage, lastPage]);
+    fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem: ListRenderItem<Movie> = useCallback(
     ({ item }) => (
       <MoviesCard
         item={item}
         onPress={() => {
-          console.log('MOVIE ID:', item.id);
-          navigate('MoviesDetailsScreen', { movieId: item.id });
+          navigate('MoviesDetailsScreen', {
+            movieId: item.id,
+          });
         }}
       />
     ),
@@ -99,7 +86,7 @@ const WatchTab: React.FC = () => {
   );
 
   const renderFooter = useCallback(() => {
-    if (!pageLoading) {
+    if (!isFetchingNextPage) {
       return null;
     }
 
@@ -108,15 +95,37 @@ const WatchTab: React.FC = () => {
         <Loader />
       </View>
     );
-  }, [pageLoading]);
-  const insets = useSafeAreaInsets();
+  }, [isFetchingNextPage]);
+
   const statusBarSpacerStyle = {
-    paddingTop: insets?.top ? insets.top + 5 : 25,
+    paddingTop: insets.top ? insets.top + 5 : 25,
     backgroundColor: '#FFFFFF',
   };
+
+  if (isError) {
+    return (
+      <View style={styles.container}>
+        <View style={statusBarSpacerStyle} />
+
+        <AppHeader
+          title="Watch"
+          onSearchPress={() => {
+            navigate('SearchScreen');
+          }}
+        />
+
+        <View style={styles.emptyContainer}>
+          <Text>Something went wrong.</Text>
+          <Button title="Try Again" onPress={() => refetch()} />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={statusBarSpacerStyle} />
+
       <AppHeader
         title="Watch"
         onSearchPress={() => {
@@ -124,35 +133,32 @@ const WatchTab: React.FC = () => {
         }}
       />
 
-      {loading ? (
+      {isLoading ? (
         <View style={styles.skeletonContainer}>
           {Array.from({ length: 5 }).map((_, index) => (
             <MovieCardSkeleton key={index} />
           ))}
         </View>
+      ) : movies.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text>No movies found.</Text>
+        </View>
       ) : (
         <FlatList
-          data={data}
+          data={movies}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
-          // Performance
           initialNumToRender={6}
           maxToRenderPerBatch={6}
           windowSize={7}
           updateCellsBatchingPeriod={50}
-          removeClippedSubviews={true}
-          // Fixed item size optimization
+          removeClippedSubviews
           getItemLayout={getItemLayout}
-          // Pagination
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
-          // UI
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContentContainer}
-          // Footer loader
           ListFooterComponent={renderFooter}
-          // Avoid unnecessary layout animation
-          disableVirtualization={false}
         />
       )}
     </View>

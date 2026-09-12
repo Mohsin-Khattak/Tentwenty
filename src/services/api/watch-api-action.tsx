@@ -1,20 +1,28 @@
 import { tmdbClient } from '../../config/axios-interceptor';
+import {
+  MovieDetails,
+  movieDetailsSchema,
+  MovieVideosResponse,
+  movieVideosResponseSchema,
+  TMDBResponse,
+  tmdbResponseSchema,
+} from '../../validation/movie-schema';
 import { TMDB_URLS } from './api-urls';
 
-export const getUpcomingMovies = async (page = 1) => {
+export const getUpcomingMovies = async (page = 1): Promise<TMDBResponse> => {
   const response = await tmdbClient.get(TMDB_URLS.upcoming, {
-    params: {
-      page,
-    },
+    params: { page },
   });
 
-  return response.data;
+  return tmdbResponseSchema.parse(response.data);
 };
 
-export const getMovieDetails = async (movieId: number) => {
+export const getMovieDetails = async (
+  movieId: number,
+): Promise<MovieDetails> => {
   const response = await tmdbClient.get(`${TMDB_URLS.movieDetails}/${movieId}`);
 
-  return response.data;
+  return movieDetailsSchema.parse(response.data);
 };
 
 export const getMovieImages = async (movieId: number) => {
@@ -25,12 +33,14 @@ export const getMovieImages = async (movieId: number) => {
   return response.data;
 };
 
-export const getMovieVideos = async (movieId: number) => {
+export const getMovieVideos = async (
+  movieId: number,
+): Promise<MovieVideosResponse> => {
   const response = await tmdbClient.get(
     `${TMDB_URLS.movieVideos}/${movieId}/videos`,
   );
 
-  return response.data;
+  return movieVideosResponseSchema.parse(response.data);
 };
 
 export const searchMovies = async (query: string, page = 1) => {

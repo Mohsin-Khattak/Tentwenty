@@ -7,6 +7,7 @@ export const colors = {
   ghostwhite: '#F6F6FA',
   oldlavender: '#827D88',
   skyblue: '#61C3F2',
+  skyblue2: '#60C3D8',
   lavendergray: '#DBDBDF',
   seagreen: '#15D2BC',
   pink: '#E26CA5',

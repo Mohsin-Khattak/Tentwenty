@@ -1,89 +1,103 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Button,
   ScrollView,
+  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useQuery } from '@tanstack/react-query';
+
 import { BackIcon, PlayIcon } from '../../assets/icons';
 import { PrimaryButton } from '../../components/atoms/button/primary-button';
-
 import { TrailerModal } from '../../components/atoms/modal/trailermodal';
 import { navigate } from '../../navigation/navigation-ref';
 import {
   getMovieDetails,
   getMovieVideos,
 } from '../../services/api/watch-api-action';
-import { MovieDetails } from '../../types/entities-types';
 import Bold from '../../typography/bold-text';
 import Medium from '../../typography/medium-text';
 import Regular from '../../typography/regular-text';
+import { MovieDetails } from '../../validation/movie-schema';
 import styles from './styles';
+import { colors } from '../../config/colors';
 
-const GENRE_COLORS = ['#15D2BC', '#E26CA5', '#564CA3', '#CD9D0F', '#60C3D8'];
+const GENRE_COLORS = [
+  colors.seagreen,
+  colors.pink,
+  colors.blue,
+  colors.goldenrod,
+  colors.skyblue2,
+];
 
-const MoviesDetailsScreen = (props: any) => {
-  const movieId = props.route?.params?.movieId;
-  const [data, setData] = useState<MovieDetails | null>(null);
-  const [loading, setLoading] = useState(true);
+type MoviesDetailsScreenProps = {
+  route: {
+    params: {
+      movieId: number;
+    };
+  };
+  navigation: {
+    goBack: () => void;
+  };
+};
 
-  // Player States
+const MoviesDetailsScreen: React.FC<MoviesDetailsScreenProps> = ({
+  route,
+  navigation,
+}) => {
+  const { movieId } = route.params;
+  const insets = useSafeAreaInsets();
+
+  // Movie details
+  const { data, isLoading, isError, refetch } = useQuery<MovieDetails>({
+    queryKey: ['movieDetails', movieId],
+    queryFn: () => getMovieDetails(movieId),
+    enabled: !!movieId,
+  });
+
+  // Trailer states
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [trailerLoading, setTrailerLoading] = useState(false);
 
-  const insets = useSafeAreaInsets();
-
-  const getDetails = useCallback(async () => {
-    try {
-      const response = await getMovieDetails(movieId);
-      setData(response);
-    } catch (error) {
-      console.log('TMDB ERROR:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [movieId]);
-
-  const getVideoTrailer = async () => {
+  const getVideoTrailer = useCallback(async () => {
     try {
       setTrailerLoading(true);
+
       const response = await getMovieVideos(movieId);
-      const results = response?.results || [];
+      const results = response?.results ?? [];
 
       const officialTrailer = results.find(
-        (item: any) => item.site === 'YouTube' && item.type === 'Trailer',
+        item => item.site === 'YouTube' && item.type === 'Trailer',
       );
+
       const selectedVideo =
-        officialTrailer || results.find((item: any) => item.site === 'YouTube');
+        officialTrailer ?? results.find(item => item.site === 'YouTube');
 
       if (selectedVideo?.key) {
         setTrailerKey(selectedVideo.key);
         setIsVideoVisible(true);
         setPlaying(true);
-      } else {
-        console.log('No video trailer key found');
       }
     } catch (error) {
-      console.log('TMDB TRAILER ERROR:', error);
+      // Error can be handled with a reusable error state/toast later.
+      console.log('error==>', error);
     } finally {
       setTrailerLoading(false);
     }
-  };
+  }, [movieId]);
 
-  const closePlayer = () => {
+  const closePlayer = useCallback(() => {
     setPlaying(false);
     setIsVideoVisible(false);
-  };
+  }, []);
 
-  useEffect(() => {
-    getDetails();
-  }, [getDetails]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#61C3F2" />
@@ -91,11 +105,26 @@ const MoviesDetailsScreen = (props: any) => {
     );
   }
 
-  const backdropUrl = data?.poster_path
+  if (isError || !data) {
+    return (
+      <View style={styles.loaderContainer}>
+        <Text>Something went wrong.</Text>
+
+        <Button
+          title="Try Again"
+          onPress={() => {
+            refetch();
+          }}
+        />
+      </View>
+    );
+  }
+
+  const backdropUrl = data.poster_path
     ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
     : '';
 
-  const formattedDate = data?.release_date
+  const formattedDate = data.release_date
     ? new Date(data.release_date).toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
@@ -114,7 +143,7 @@ const MoviesDetailsScreen = (props: any) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.headerImage}>
+        <View style={styles.headerImageContainer}>
           <FastImage
             source={{
               uri: backdropUrl,
@@ -128,24 +157,33 @@ const MoviesDetailsScreen = (props: any) => {
           <View style={[styles.overlay, dynamicOverlayStyle]}>
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => props.navigation?.goBack()}
+              onPress={navigation.goBack}
             >
               <BackIcon />
-              <Regular style={styles.backText} label={'Watch'} />
+
+              <Regular style={styles.backText} label="Watch" />
             </TouchableOpacity>
 
             <View style={styles.headerContent}>
-              <Medium style={styles.title} fontSize={16} label={data?.title} />
+              <Medium style={styles.title} fontSize={16} label={data.title} />
+
               {formattedDate ? (
-                <Medium fontSize={16} style={styles.releaseDate}>
-                  In Theaters {formattedDate}
-                </Medium>
+                <Medium
+                  fontSize={16}
+                  style={styles.releaseDate}
+                  label={`In Theaters ${formattedDate}`}
+                />
               ) : null}
 
               <PrimaryButton
                 title="Get Tickets"
-                onPress={() => navigate('SeatLayoutScreen')}
+                onPress={() =>
+                  navigate('SeatLayoutScreen', {
+                    movieId: data.id,
+                  })
+                }
               />
+
               <PrimaryButton
                 title={trailerLoading ? 'Loading...' : 'Watch Trailer'}
                 variant="outlined"
@@ -157,10 +195,10 @@ const MoviesDetailsScreen = (props: any) => {
         </View>
 
         <View style={styles.detailsContainer}>
-          <Medium style={styles.sectionTitle} label={'Genres'} />
+          <Medium style={styles.sectionTitle} label="Genres" />
 
           <View style={styles.genresRow}>
-            {data?.genres?.map((genre, index) => (
+            {data.genres.map((genre, index) => (
               <View
                 key={genre.id}
                 style={[
@@ -181,16 +219,16 @@ const MoviesDetailsScreen = (props: any) => {
 
           <View style={styles.divider} />
 
-          <Medium style={styles.sectionTitle} label={'Overview'} />
+          <Medium style={styles.sectionTitle} label="Overview" />
+
           <Regular
             numberOfLines={100}
             style={styles.overviewText}
-            label={data?.overview}
+            label={data.overview}
           />
         </View>
       </ScrollView>
 
-      {/* Reusable Trailer Modal Component */}
       <TrailerModal
         visible={isVideoVisible}
         trailerKey={trailerKey}

@@ -1,6 +1,8 @@
 type RootStackParamList = {
   BottomTab: undefined;
-  MoviesDetailsScreen: undefined;
+  MoviesDetailsScreen: {
+    movieId: number;
+  };
   SeatLayoutScreen: undefined;
   SeatSelectScreen: undefined;
   SearchScreen: undefined;

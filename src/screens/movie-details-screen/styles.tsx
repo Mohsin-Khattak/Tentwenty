@@ -16,9 +16,14 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
-  headerImage: {
+  headerImageContainer: {
     width: '100%',
     height: height * 0.6,
+  },
+
+  headerImage: {
+    width: '100%',
+    height: '100%',
   },
   overlay: {
     position: 'absolute',

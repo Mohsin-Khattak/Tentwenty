@@ -6,7 +6,6 @@ import { NavigationProps } from '../types/navigation-types';
 const getErrorList = (data: any) => {
   const { message, errors } = data;
   let concatenatedMessages: any = null;
-  console.log('errors=>>::', errors);
 
   if (typeof errors === 'object' && Object.keys(errors)?.length) {
     concatenatedMessages = errors
@@ -17,7 +16,6 @@ const getErrorList = (data: any) => {
     ? Object.values(message)?.flat()?.join(', ')
     : null;
 
-  console.log(concatenatedMessages);
   return concatenatedMessages;
 };
 export const horizontalAnimation: any = {
