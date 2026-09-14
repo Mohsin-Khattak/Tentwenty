@@ -1,7 +1,11 @@
 export { default as DashboardIcon } from './dashboard.svg';
+export { default as DashboardActiveIcon } from './dashboard-active.svg';
 export { default as MediaIcon } from './media.svg';
+export { default as MediaActiveIcon } from './media-active.svg';
 export { default as WatchIcon } from './watch.svg';
+export { default as WatchInactiveIcon } from './watch-inactive.svg';
 export { default as MoreIcon } from './more.svg';
+export { default as MoreActiveIcon } from './more-active.svg';
 export { default as SearchIcon } from './search.svg';
 export { default as BackIcon } from './back.svg';
 export { default as BackBlackIcon } from './backblack.svg';
@@ -11,3 +15,4 @@ export { default as SeatLayout } from './seatlayout.svg';
 export { default as ThreedotsIcon } from './threedots.svg';
 export { default as PlusIcon } from './plus.svg';
 export { default as MinusIcon } from './minus.svg';
+export { default as NotificationIcon } from './notification.svg';

@@ -17,8 +17,6 @@ const ITEM_MARGIN = mvs(16);
 const ITEM_SIZE = ITEM_HEIGHT + ITEM_MARGIN;
 
 const WatchTab: React.FC = () => {
-  const insets = useSafeAreaInsets();
-
   const {
     data,
     isLoading,
@@ -97,16 +95,9 @@ const WatchTab: React.FC = () => {
     );
   }, [isFetchingNextPage]);
 
-  const statusBarSpacerStyle = {
-    paddingTop: insets.top ? insets.top + 5 : 25,
-    backgroundColor: '#FFFFFF',
-  };
-
   if (isError) {
     return (
       <View style={styles.container}>
-        <View style={statusBarSpacerStyle} />
-
         <AppHeader
           title="Watch"
           onSearchPress={() => {
@@ -124,8 +115,6 @@ const WatchTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={statusBarSpacerStyle} />
-
       <AppHeader
         title="Watch"
         onSearchPress={() => {

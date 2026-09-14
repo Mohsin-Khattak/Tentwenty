@@ -1,5 +1,7 @@
 import { tmdbClient } from '../../config/axios-interceptor';
 import {
+  Genre,
+  genreListResponseSchema,
   MovieDetails,
   movieDetailsSchema,
   MovieVideosResponse,
@@ -43,7 +45,10 @@ export const getMovieVideos = async (
   return movieVideosResponseSchema.parse(response.data);
 };
 
-export const searchMovies = async (query: string, page = 1) => {
+export const searchMovies = async (
+  query: string,
+  page = 1,
+): Promise<TMDBResponse> => {
   const response = await tmdbClient.get(TMDB_URLS.search, {
     params: {
       query,
@@ -51,23 +56,25 @@ export const searchMovies = async (query: string, page = 1) => {
     },
   });
 
-  return response.data;
+  return tmdbResponseSchema.parse(response.data);
 };
-
 // 1. All Genres Fetch karne ke liye
+
 export const getGenresList = async () => {
   const response = await tmdbClient.get(TMDB_URLS.genres);
-  return response.data; // Response format: { genres: [ { id: 35, name: "Comedy" }, ... ] }
+
+  return genreListResponseSchema.parse(response.data);
 };
 
 // 2. Genre Grid ke liye Titles aur unki Image Backdrops fetch karne ka function
-export const getGenresWithImages = async () => {
-  const genresData = await getGenresList();
-  const genresList = genresData?.genres || [];
 
-  // Har genre ki top 1 movie se image backdrop le kar array ready karega
+// Har genre ki top 1 movie se image backdrop le kar array ready karega
+export const getGenresWithImages = async (): Promise<Genre[]> => {
+  const genresData = await getGenresList();
+  const genresList = genresData.genres;
+
   const genresWithImages = await Promise.all(
-    genresList.map(async (genre: { id: number; name: string }) => {
+    genresList.map(async genre => {
       try {
         const response = await tmdbClient.get(TMDB_URLS.discover, {
           params: {
@@ -78,6 +85,7 @@ export const getGenresWithImages = async () => {
         });
 
         const topMovie = response.data?.results?.[0];
+
         const imagePath = topMovie?.backdrop_path || topMovie?.poster_path;
 
         return {
@@ -87,9 +95,7 @@ export const getGenresWithImages = async () => {
             ? `https://image.tmdb.org/t/p/w500${imagePath}`
             : null,
         };
-      } catch (error: any) {
-        console.log('error check==>', error);
-
+      } catch {
         return {
           id: genre.id,
           name: genre.name,
@@ -99,5 +105,5 @@ export const getGenresWithImages = async () => {
     }),
   );
 
-  return genresWithImages; // Direct Array milega: [{ id: 35, name: "Comedy", image: "https://..." }]
+  return genresWithImages;
 };

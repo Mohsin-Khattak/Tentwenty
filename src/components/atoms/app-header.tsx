@@ -1,27 +1,59 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { SearchIcon } from '../../assets/icons';
+import { NotificationIcon, SearchIcon } from '../../assets/icons';
 import { colors } from '../../config/colors';
 import { mvs } from '../../config/metrices';
-import Medium from '../../typography/medium-text';
+import Bold from '../../typography/bold-text';
+import SemiBold from '../../typography/semi-bold-text';
 
 interface AppHeaderProps {
-  title: string;
   onSearchPress?: () => void;
+  onNotificationPress?: () => void;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ title, onSearchPress }) => {
+const AppHeader: React.FC<AppHeaderProps> = ({
+  onSearchPress,
+  onNotificationPress,
+}) => {
+  const [greeting, setGreeting] = useState('Good Morning');
+
+  useEffect(() => {
+    const currentHour = new Date().getHours();
+    if (currentHour >= 5 && currentHour < 12) {
+      setGreeting('Good Morning');
+    } else if (currentHour >= 12 && currentHour < 17) {
+      setGreeting('Good Afternoon');
+    } else {
+      setGreeting('Good Evening');
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Medium label={title} fontSize={mvs(16)} color={colors.darkpurple} />
-
-      <TouchableOpacity
-        onPress={onSearchPress}
-        style={styles.searchButton}
-        hitSlop={10}
-      >
-        <SearchIcon />
-      </TouchableOpacity>
+      <View>
+        <Bold label={`${greeting},`} fontSize={22} color={colors.darkpurple} />
+        <SemiBold
+          label={'Mohsin Khattak '}
+          fontSize={mvs(16)}
+          color={colors.darkpurple}
+        />
+      </View>
+      <View style={styles.headerButton}>
+        <TouchableOpacity
+          onPress={onSearchPress}
+          style={styles.searchButton}
+          hitSlop={10}
+        >
+          <SearchIcon />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onNotificationPress}
+          style={styles.searchButton}
+          hitSlop={10}
+        >
+          <NotificationIcon />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -39,11 +71,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: mvs(1),
     borderBottomColor: colors.bordercolor,
   },
-
   searchButton: {
     width: mvs(40),
     height: mvs(40),
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: mvs(10),
   },
 });

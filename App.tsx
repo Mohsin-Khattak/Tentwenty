@@ -12,7 +12,7 @@ import { queryClient } from './src/config/query-client';
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider style={styles.container}>
+      <SafeAreaProvider>
         <NavigationContainer ref={navigationRef}>
           <RootNavigator />
         </NavigationContainer>

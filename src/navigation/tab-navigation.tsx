@@ -1,14 +1,28 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+
+import {
+  DashboardActiveIcon,
+  DashboardIcon,
+  MediaActiveIcon,
+  MediaIcon,
+  MoreActiveIcon,
+  MoreIcon,
+  WatchIcon,
+  WatchInactiveIcon,
+} from '../assets/icons';
+
+import { colors } from '../config/colors';
+import { mvs } from '../config/metrices';
 import DashboardTab from '../screens/dashboard-tab';
 import MediaTab from '../screens/media-tab';
 import MoreTab from '../screens/more-tab';
 import TabParamList from '../types/navigation-types/bottom-tab';
-
-import { DashboardIcon, MediaIcon, MoreIcon, WatchIcon } from '../assets/icons';
-import { colors } from '../config/colors';
-import { mvs } from '../config/metrices';
 import { WatchStackNavigator } from './watch-navigation';
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -16,25 +30,30 @@ const Tab = createBottomTabNavigator<TabParamList>();
 const ACTIVE_COLOR = colors.white;
 const INACTIVE_COLOR = colors.oldlavender;
 
-// Helper function moved outside the component to prevent re-creation on every render
-const renderTabBarIcon = (routeName: keyof TabParamList, color: string) => {
+const renderTabBarIcon = (routeName: keyof TabParamList, focused: boolean) => {
   switch (routeName) {
     case 'DashboardTab':
-      return <DashboardIcon fill={color} />;
+      return focused ? <DashboardActiveIcon /> : <DashboardIcon />;
+
     case 'WatchTab':
-      return <WatchIcon fill={color} />;
+      return focused ? <WatchIcon /> : <WatchInactiveIcon />;
+
     case 'MediaTab':
-      return <MediaIcon fill={color} />;
+      return focused ? <MediaActiveIcon /> : <MediaIcon />;
+
     case 'MoreTab':
-      return <MoreIcon fill={color} />;
+      return focused ? <MoreActiveIcon /> : <MoreIcon />;
+
     default:
       return null;
   }
 };
 
 const TabNavigator = () => {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Tab.Navigator
         initialRouteName="WatchTab"
         screenOptions={({ route }) => ({
@@ -43,10 +62,17 @@ const TabNavigator = () => {
           tabBarActiveTintColor: ACTIVE_COLOR,
           tabBarInactiveTintColor: INACTIVE_COLOR,
 
-          tabBarStyle: styles.tabBar,
+          tabBarStyle: [
+            styles.tabBar,
+            {
+              paddingBottom: insets.bottom + mvs(10),
+              height: 60 + insets.bottom,
+            },
+          ],
+
           tabBarLabelStyle: styles.tabBarLabel,
 
-          tabBarIcon: ({ color }) => renderTabBarIcon(route.name, color),
+          tabBarIcon: ({ focused }) => renderTabBarIcon(route.name, focused),
         })}
       >
         <Tab.Screen
@@ -81,7 +107,7 @@ const TabNavigator = () => {
           }}
         />
       </Tab.Navigator>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -90,11 +116,10 @@ export default TabNavigator;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.darkpurple,
+    backgroundColor: colors.white,
   },
 
   tabBar: {
-    height: 85,
     backgroundColor: colors.darkpurple,
 
     borderTopLeftRadius: 27,
@@ -110,7 +135,6 @@ const styles = StyleSheet.create({
     right: 0,
 
     paddingTop: mvs(10),
-    paddingBottom: 25,
   },
 
   tabBarLabel: {
