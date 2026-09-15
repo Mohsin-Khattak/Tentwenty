@@ -16,3 +16,4 @@ export { default as ThreedotsIcon } from './threedots.svg';
 export { default as PlusIcon } from './plus.svg';
 export { default as MinusIcon } from './minus.svg';
 export { default as NotificationIcon } from './notification.svg';
+export { default as SearchTwo } from './SearchTwo.svg';

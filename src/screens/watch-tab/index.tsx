@@ -99,7 +99,6 @@ const WatchTab: React.FC = () => {
     return (
       <View style={styles.container}>
         <AppHeader
-          title="Watch"
           onSearchPress={() => {
             navigate('SearchScreen');
           }}
@@ -116,7 +115,6 @@ const WatchTab: React.FC = () => {
   return (
     <View style={styles.container}>
       <AppHeader
-        title="Watch"
         onSearchPress={() => {
           navigate('SearchScreen');
         }}

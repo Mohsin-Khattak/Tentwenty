@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { SearchIcon, CloseIcon } from '../../assets/icons';
+import { SearchIcon, CloseIcon, SearchTwo } from '../../assets/icons';
 import { colors } from '../../config/colors';
 import { mvs } from '../../config/metrices';
 
@@ -23,7 +23,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     <View style={styles.mainContainer}>
       <View style={styles.searchBarContainer}>
         <View style={styles.searchIconWrapper}>
-          <SearchIcon />
+          <SearchTwo />
         </View>
 
         <TextInput
